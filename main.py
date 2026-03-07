@@ -1,63 +1,37 @@
 from fastapi import FastAPI
-from blog_fetcher.search import search_links
+from topic_engine.topic_expander import expand_topic
+from blog_fetcher.multi_search import multi_source_search
 from blog_fetcher.extractor import extract_blog_metadata
 from blog_comparator.comparator import BlogComparator
-from rag_engine.retriever import Retriever
-from rag_engine.generator import Generator
-from config.settings import settings
 
 app = FastAPI()
 
 comparator = BlogComparator()
-retriever = Retriever()
-generator = Generator()
+
 
 @app.get("/search")
-def search_topic(topic: str):
+def search(topic: str):
 
-    links = search_links(topic)
-    blogs = []
+    try:
 
-    for link in links:
-        meta = extract_blog_metadata(link["url"])
-        if meta:
-            blogs.append(meta)
+        print("User topic:", topic)
 
-    best_blog = comparator.select_best_blog(topic, blogs)
+        queries = expand_topic(topic)
 
-    if not best_blog:
-        return {"message": "No relevant blog found."}
+        print("Expanded queries:", queries)
 
-    retriever.add_documents([
-        {"content": best_blog["snippet"]}
-    ])
+        blogs = multi_source_search(topic)
 
-    return {
-        "selected_blog": best_blog
-    }
+        print("Blogs found:", blogs)
 
-@app.get("/ask")
-def ask_question(question: str):
+        extracted = [extract_blog_metadata(url) for url in blogs]
 
-    retrieved_docs = retriever.retrieve(question)
+        result = comparator.compare(extracted)
 
-    context = "\n".join(
-        doc["metadata"]["content"]
-        for doc in retrieved_docs
-    )
+        return result
 
-    prompt = f"""
-    Answer only from the provided context.
-    Context:
-    {context}
+    except Exception as e:
 
-    Question:
-    {question}
-    """
+        print("ERROR:", str(e))
 
-    answer = generator.generate(prompt)
-
-    return {
-        "answer": answer,
-        "confidence": len(retrieved_docs)
-    }
+        return {"error": str(e)}

@@ -1,34 +1,30 @@
 import requests
-from bs4 import BeautifulSoup
-from config.settings import settings
+import xml.etree.ElementTree as ET
 
-def search_links(query: str):
 
-    url = "https://www.bing.com/search"
-    params = {
-        "q": query,
-        "format": "rss"
-    }
+def search_blogs(queries, max_results=5):
 
-    try:
-        response = requests.get(url, params=params, timeout=settings.REQUEST_TIMEOUT)
-        soup = BeautifulSoup(response.content, "xml")
+    urls = []
 
-        results = []
+    for query in queries:
 
-        for item in soup.find_all("item"):
-            link = item.link.text
-            title = item.title.text
+        url = f"https://www.bing.com/news/search?q={query}&format=rss"
 
-            results.append({
-                "title": title,
-                "url": link
-            })
+        response = requests.get(url)
 
-            if len(results) >= settings.MAX_SEARCH_RESULTS:
+        root = ET.fromstring(response.content)
+
+        for item in root.iter("item"):
+
+            link = item.find("link").text
+
+            if link:
+                urls.append(link)
+
+            if len(urls) >= max_results:
                 break
 
-        return results
+        if len(urls) >= max_results:
+            break
 
-    except Exception:
-        return []
+    return urls

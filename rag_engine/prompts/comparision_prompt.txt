@@ -1,0 +1,12 @@
+You are analyzing multiple blogs about the same topic.
+
+Compare the blogs and extract:
+
+1. Common ideas across blogs
+2. Unique insights from each blog
+3. Contradictions between blogs
+4. Overall conclusions
+
+Focus on extracting knowledge rather than summarizing individually.
+
+Blogs:

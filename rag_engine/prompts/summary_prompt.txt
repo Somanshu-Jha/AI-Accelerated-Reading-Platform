@@ -1,0 +1,19 @@
+You are an expert research assistant.
+
+Summarize the following blog content clearly and concisely.
+
+Focus on:
+- key ideas
+- main argument
+- important insights
+- useful information
+
+Avoid filler or unnecessary details.
+
+Output format:
+
+Main Topic:
+Key Points:
+Important Insight:
+
+Blog Content:

@@ -1,0 +1,14 @@
+Analyze the following blog article.
+
+Extract the following information:
+
+1. Main topic of the blog
+2. Key ideas discussed
+3. Important insights or conclusions
+4. Reading difficulty (Beginner / Intermediate / Advanced)
+5. Estimated reading time
+6. Overall usefulness
+
+Provide structured output.
+
+Blog Content:

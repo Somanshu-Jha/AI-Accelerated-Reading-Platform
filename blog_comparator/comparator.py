@@ -1,27 +1,29 @@
-import numpy as np
-from embedding_engine.embedder import Embedder
-
 class BlogComparator:
 
     def __init__(self):
-        self.embedder = Embedder()
+        pass
 
-    def select_best_blog(self, topic, blogs):
-        topic_embedding = self.embedder.embed(topic)
 
-        scored = []
+    def compare(self, blogs):
+        """
+        Compare multiple blog contents and return structured insights
+        """
+
+        results = []
+
         for blog in blogs:
-            blog_embedding = self.embedder.embed(
-                blog["title"] + " " + blog.get("snippet", "")
-            )
 
-            similarity = float(np.dot(topic_embedding, blog_embedding))
+            if blog is None:
+                continue
 
-            scored.append({
-                "blog": blog,
-                "score": similarity
+            results.append({
+                "title": blog.get("title"),
+                "author": blog.get("authors"),
+                "summary": blog.get("summary"),
+                "url": blog.get("url")
             })
 
-        scored.sort(key=lambda x: x["score"], reverse=True)
-
-        return scored[0]["blog"] if scored else None
+        return {
+            "total_blogs": len(results),
+            "blogs": results
+        }
