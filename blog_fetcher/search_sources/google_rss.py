@@ -1,6 +1,6 @@
 import feedparser
 
-def search_google_rss(query, limit=5):
+def search_google_rss(query, limit=20):
 
     url = f"https://news.google.com/rss/search?q={query}"
 

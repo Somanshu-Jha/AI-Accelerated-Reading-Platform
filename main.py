@@ -4,7 +4,11 @@ from blog_fetcher.multi_search import multi_source_search
 from blog_fetcher.extractor import extract_blog_metadata
 from blog_comparator.comparator import BlogComparator
 
-app = FastAPI()
+app = FastAPI(
+    title="AI Accelerated Reading Platform",
+    description="AI powered research engine for discovering and comparing blogs",
+    version="0.3"
+)
 
 comparator = BlogComparator()
 
@@ -12,26 +16,30 @@ comparator = BlogComparator()
 @app.get("/search")
 def search(topic: str):
 
-    try:
+    print("User topic:", topic)
 
-        print("User topic:", topic)
+    queries = expand_topic(topic)
 
-        queries = expand_topic(topic)
+    print("Expanded queries:", queries)
 
-        print("Expanded queries:", queries)
+    blogs = []
 
-        blogs = multi_source_search(topic)
+    for q in queries:
 
-        print("Blogs found:", blogs)
+        results = multi_source_search(q)
 
-        extracted = [extract_blog_metadata(url) for url in blogs]
+        print("Results for query:", q, results)
 
-        result = comparator.compare(extracted)
+        blogs.extend(results)
 
-        return result
+    blogs = list(set(blogs))
 
-    except Exception as e:
+    blogs = [b for b in blogs if b.startswith("http")]
 
-        print("ERROR:", str(e))
+    print("Total URLs:", len(blogs))
 
-        return {"error": str(e)}
+    extracted = [extract_blog_metadata(url) for url in blogs]
+
+    result = comparator.compare(extracted)
+
+    return result

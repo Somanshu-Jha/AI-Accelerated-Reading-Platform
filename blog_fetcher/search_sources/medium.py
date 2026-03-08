@@ -1,6 +1,6 @@
 import feedparser
 
-def search_medium(query, limit=5):
+def search_medium(query, limit=20):
 
     url = f"https://medium.com/feed/tag/{query}"
 

@@ -1,6 +1,6 @@
 import requests
 
-def search_hn(query, limit=5):
+def search_hn(query, limit=20):
 
     url = f"https://hn.algolia.com/api/v1/search?query={query}"
 

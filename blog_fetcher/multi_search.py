@@ -2,6 +2,7 @@ from blog_fetcher.search_sources.google_rss import search_google_rss
 from blog_fetcher.search_sources.devto import search_devto
 from blog_fetcher.search_sources.hn import search_hn
 from blog_fetcher.search_sources.medium import search_medium
+from blog_fetcher.search_sources.google_web import search_google_web
 
 
 def multi_source_search(query):
@@ -25,6 +26,10 @@ def multi_source_search(query):
 
     try:
         urls += search_medium(query)
+    except:
+        pass
+    try:
+        urls += search_google_web(query)
     except:
         pass
 

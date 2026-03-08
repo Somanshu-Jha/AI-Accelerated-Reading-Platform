@@ -1,45 +1,26 @@
-import requests
-from bs4 import BeautifulSoup
 from newspaper import Article
-from config.settings import settings
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0"
-}
 
-def extract_blog_metadata(url: str):
+def extract_blog_metadata(url):
 
     try:
         article = Article(url)
         article.download()
         article.parse()
+        article.nlp()
 
-        if article.text and len(article.text) > 300:
-            return {
-                "title": article.title,
-                "url": url,
-                "snippet": article.text[:700]
-            }
+        return {
+            "title": article.title,
+            "author": article.authors,
+            "summary": article.summary,
+            "url": url
+        }
 
-    except:
-        pass
+    except Exception as e:
 
-    # Fallback parser
-    try:
-        response = requests.get(url, headers=HEADERS, timeout=settings.REQUEST_TIMEOUT)
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        paragraphs = soup.find_all("p")
-        text = " ".join(p.get_text() for p in paragraphs)
-
-        if len(text) > 300:
-            return {
-                "title": soup.title.string if soup.title else "Untitled",
-                "url": url,
-                "snippet": text[:700]
-            }
-
-    except:
-        pass
-
-    return None
+        return {
+            "title": None,
+            "author": None,
+            "summary": None,
+            "url": url
+        }

@@ -1,6 +1,6 @@
 import requests
 
-def search_devto(query, limit=5):
+def search_devto(query, limit=20):
 
     url = f"https://dev.to/api/articles?tag={query}"
 
