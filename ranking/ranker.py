@@ -1,10 +1,12 @@
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+
 
 
 class Ranker:
 
     def rank(self, query_embedding, blog_embeddings, blogs):
+        if len(blog_embeddings)==0:
+            return []
 
         scores = cosine_similarity(
             [query_embedding],

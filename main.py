@@ -5,58 +5,130 @@ from blog_fetcher.extractor import extract_blog_metadata
 from blog_comparator.comparator import BlogComparator
 from ranking.ranker import Ranker
 from embedding_engine.embedder import Embedder
-
-eanker = Ranker()
-embedder = Embedder()
+from ml_models.difficulty_classifier import classify_difficulty
 
 app = FastAPI(
     title="AI Accelerated Reading Platform",
     description="AI powered research engine for discovering and comparing blogs",
-    version="0.3"
+    version="0.4"
 )
 
+ranker = Ranker()
+embedder = Embedder()
 comparator = BlogComparator()
 
 
 @app.get("/search")
 def search(topic: str):
 
-    print("User topic:", topic)
+    try:
 
-    queries = expand_topic(topic)
+        print("User topic:", topic)
 
-    print("Expanded queries:", queries)
+        queries = expand_topic(topic)
 
-    blogs = []
+        print("Expanded queries:", queries)
 
-    for q in queries:
+        urls = []
 
-        results = multi_source_search(q)
+        for q in queries:
 
-        print("Results for query:", q, results)
+            results = multi_source_search(q)
 
-        blogs.extend(results)
+            print("Results for query:", q, len(results))
 
-    blogs = list(set(blogs))
+            urls.extend(results)
 
-    blogs = [b for b in blogs if b.startswith("http")]
+        urls = list(set(urls))
 
-    print("Total URLs:", len(blogs))
+        urls = [u for u in urls if u.startswith("http")]
 
-    extracted = [extract_blog_metadata(url) for url in blogs]
-    query_embedding = embedder.embed(query)
-    blog_embeddings = []
-    
-    for blog in extracted:
-        text = blog.get("title","") + " " + blog.get("summary"or "")
-        embedding = embedder.embed(text)
-    ranked = Ranker.rank(query_embedding,
-    blog_embeddings,
-    extracted
-    )
-    top_result = ranked[:10]
+        print("Total URLs:", len(urls))
 
+        if len(urls) == 0:
 
-    result = comparator.compare(top_result)
+            return {
+                "topic": topic,
+                "total_blogs": 0,
+                "blogs": []
+            }
 
-    return result
+        extracted = []
+
+        for url in urls:
+
+            blog = extract_blog_metadata(url)
+
+            if blog is None:
+                continue
+
+            if blog.get("title") is None:
+                continue
+
+            extracted.append(blog)
+
+        print("Extracted blogs:", len(extracted))
+
+        if len(extracted) == 0:
+
+            return {
+                "topic": topic,
+                "total_blogs": 0,
+                "blogs": []
+            }
+
+        # classify difficulty
+        for blog in extracted:
+
+            text = blog.get("content", "") or blog.get("summary", "")
+
+            blog["difficulty"] = classify_difficulty(text)
+
+        # create query embedding
+        query_embedding = embedder.embed(topic)
+
+        blog_embeddings = []
+        valid_blogs = []
+
+        for blog in extracted:
+
+            text = blog.get("content", "") or blog.get("summary", "")
+
+            if len(text.strip()) < 100:
+                continue
+
+            emb = embedder.embed(text[:2000])
+
+            blog_embeddings.append(emb)
+
+            valid_blogs.append(blog)
+
+        if len(blog_embeddings) == 0:
+
+            return {
+                "topic": topic,
+                "total_blogs": 0,
+                "blogs": extracted
+            }
+
+        ranked = ranker.rank(
+            query_embedding,
+            blog_embeddings,
+            valid_blogs
+        )
+
+        top_results = ranked[:10]
+
+        result = comparator.compare(top_results)
+
+        return {
+            "topic": topic,
+            "total_blogs": len(top_results),
+            "blogs": result
+        }
+
+    except Exception as e:
+
+        print("ERROR:", str(e))
+
+        return {"error": str(e)}

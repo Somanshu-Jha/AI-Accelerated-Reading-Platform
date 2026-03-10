@@ -1,16 +1,39 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
-class DifficultyClassifier:
+model = SentenceTransformer("BAAI/bge-base-en")
 
-    def __init__(self):
-        self.vectorizer = TfidfVectorizer()
-        self.model = LogisticRegression()
+BEGINNER_TEXT = """
+what is, introduction, basics, beginner guide,
+history, overview, fundamentals
+"""
 
-    def train(self, texts, labels):
-        X = self.vectorizer.fit_transform(texts)
-        self.model.fit(X, labels)
+INTERMEDIATE_TEXT = """
+architecture, how it works,
+implementation, components,
+technical explanation
+"""
 
-    def predict(self, text):
-        X = self.vectorizer.transform([text])
-        return self.model.predict(X)[0]
+ADVANCED_TEXT = """
+optimization, protocol design,
+deep technical analysis,
+research level explanation,
+advanced mechanisms
+"""
+
+reference_embeddings = model.encode([
+    BEGINNER_TEXT,
+    INTERMEDIATE_TEXT,
+    ADVANCED_TEXT
+])
+
+
+def classify_difficulty(text):
+
+    emb = model.encode([text])[0]
+
+    scores = cosine_similarity([emb], reference_embeddings)[0]
+
+    labels = ["beginner", "intermediate", "advanced"]
+
+    return labels[scores.argmax()]

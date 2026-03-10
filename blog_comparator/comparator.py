@@ -5,10 +5,9 @@ class BlogComparator:
 
 
     def compare(self, blogs):
-        """
-        Compare multiple blog contents and return structured insights
-        """
+        '''compare multiple blog content and return insights from that
 
+'''
         results = []
 
         for blog in blogs:

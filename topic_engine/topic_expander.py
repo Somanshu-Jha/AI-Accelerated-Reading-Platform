@@ -1,11 +1,9 @@
-def expand_topic(topic: str):
-    topic = topic.strip()
+def expand_topic(topic):
 
-    return list(set([
+    return [
         topic,
-        f"{topic} review",
-        f"{topic} specifications",
-        f"{topic} benchmark",
-        f"{topic} performance",
-        f"{topic} comparison"
-    ]))
+        f"{topic} tutorial",
+        f"{topic} explained",
+        f"{topic} guide",
+        f"{topic} examples"
+    ]
