@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from topic_engine.topic_expander import expand_topic
 from blog_fetcher.multi_search import multi_source_search
 from blog_fetcher.extractor import extract_blog_metadata
@@ -11,6 +12,14 @@ app = FastAPI(
     title="AI Accelerated Reading Platform",
     description="AI powered research engine for discovering and comparing blogs",
     version="0.4"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 ranker = Ranker()
